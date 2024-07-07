@@ -1,5 +1,3 @@
-const userService = require('../services/userService');
-
 const registerUser = async (req, res) => {
   try {
     // TODO - should calling user accessor service

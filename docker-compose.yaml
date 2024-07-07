@@ -1,0 +1,35 @@
+version: '3'
+
+services:
+  user-manager:
+    build: ./userManager
+    ports:
+      - "3000:3000"
+    networks:
+      - my-network
+    environment:
+      - USER_ACCESSOR_URL=http://user-accessor:3100
+
+  user-accessor:
+    build: ./userAccessor
+    ports:
+      - "3100:3100"
+    depends_on:
+      - mongodb
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017/mydatabase
+    networks:
+      - my-network
+
+  mongodb:
+    image: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./mongoDB/data/db:/data/db
+    networks:
+      - my-network
+
+networks:
+  my-network:
+    driver: bridge

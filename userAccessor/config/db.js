@@ -1,5 +1,5 @@
-const url = ``;
+const MONGODB_URI = process.env.MONGODB_URI;
 
 module.exports = {
-  url: url
+  MONGODB_URI: MONGODB_URI
 };
