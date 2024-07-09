@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 
-const newsRoutes = require('./routes/newsroutes');
+const newsRoutes = require('./routes/newsRoutes');
 
 app.use(express.json());
 
