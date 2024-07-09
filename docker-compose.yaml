@@ -21,6 +21,16 @@ services:
     networks:
       - my-network
 
+  news-aggregation-engine:
+    build: ./newsAggregationEngine
+    ports:
+      - "3200:3200"
+    depends_on:
+      - user-accessor
+      - user-manager
+    networks:
+      - my-network
+
   mongodb:
     image: mongo
     ports:
