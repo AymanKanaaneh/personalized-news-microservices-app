@@ -1,6 +1,7 @@
 const { model } = require("../../config/geminiAI");
 const nodemailer = require('../../config/nodemailer');
 const { ZIONET_MAILER_EMAIL } = require('../../config/environment');
+const logger = require('../../config/logger');
 
 const preferences = [
     "technology",
@@ -18,15 +19,19 @@ const preferences = [
  */
 const pickUserNews = async (userEmailAddress) => {
     try {
+        logger.info(`Fetching news for ${userEmailAddress}`);
+
         const prompt = generatePrompt();
         const result = await model.generateContent(prompt);
         const response = await result.response;
         const jsonString = extractJsonString(response);
         const jsonNewsArr = JSON.parse(jsonString);
         sendNews(userEmailAddress, jsonNewsArr);
+
+        logger.info(`News sent successfully to ${userEmailAddress}`);
         return { message: "The news has been sent successfully" };
     } catch (error) {
-        console.error('Error fetching or sending news:', error);
+        logger.error(`Error fetching or sending news for ${userEmailAddress}: ${error.message}`);
         throw error;
     }
 };
