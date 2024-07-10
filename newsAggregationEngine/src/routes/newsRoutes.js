@@ -4,7 +4,7 @@ const router = express.Router();
 const newsController = require('../controllers/newsController');
 
 
-router.get('/:emailAddress', newsController.pickUserNews);
+router.get('/:userEmailAddress', newsController.pickUserNews);
 
 
 module.exports = router;
