@@ -20,7 +20,7 @@ services:
         max_attempts: 10
         window: 120s
     command: ["./daprd",
-        "-app-port", "80",
+        "-app-port", "3000",
         "-app-id", "user-manager",
         "-app-protocol", "http",
         "-dapr-http-port", "3500",
@@ -55,7 +55,7 @@ services:
         max_attempts: 10
         window: 120s
     command: ["./daprd",
-        "-app-port", "80",
+        "-app-port", "3100",
         "-app-id", "user-accessor",
         "-app-protocol", "http",
         "-dapr-http-port", "3500",
@@ -89,7 +89,7 @@ services:
         max_attempts: 10
         window: 120s
     command: ["./daprd",
-        "-app-port", "80",
+        "-app-port", "3200",
         "-app-id", "news-aggregation-engine",
         "-app-protocol", "http",
         "-dapr-http-port", "3500",
