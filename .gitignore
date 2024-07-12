@@ -1,6 +1,11 @@
-# ignore ALL files in ANY directory named node_modules
+# Ignore node_modules directory
 node_modules/
 
-mongoDB
+# Ignore MongoDB directory
+mongoDB/
 
+# Ignore package-lock.json files anywhere in the directory tree
 **/package-lock.json
+
+# Ignore service log files
+service.log

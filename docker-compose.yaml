@@ -1,6 +1,7 @@
 version: '3'
 
 services:
+
   user-manager:
     build: ./userManager
     ports:
@@ -9,6 +10,30 @@ services:
       - my-network
     environment:
       - USER_ACCESSOR_URL=http://user-accessor:3100
+
+  user-manager-dapr:
+    image: "daprio/daprd:edge"
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 10
+        window: 120s
+    command: ["./daprd",
+        "-app-port", "80",
+        "-app-id", "user-manager",
+        "-app-protocol", "http",
+        "-dapr-http-port", "3500",
+        #"-placement-host-address", "placement:50006",
+        "-components-path", "./dapr/components",
+        "-config", "./dapr/config.yaml",
+        # "-log-level", "debug"
+        ]
+    volumes:
+      - "./dapr/:/dapr"
+    depends_on:
+      - user-manager
+    network_mode: "service:user-manager"
 
   user-accessor:
     build: ./userAccessor
@@ -21,6 +46,30 @@ services:
     networks:
       - my-network
 
+  user-accessor-dapr:
+    image: "daprio/daprd:edge"
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 10
+        window: 120s
+    command: ["./daprd",
+        "-app-port", "80",
+        "-app-id", "user-accessor",
+        "-app-protocol", "http",
+        "-dapr-http-port", "3500",
+        #"-placement-host-address", "placement:50006",
+        "-components-path", "./dapr/components",
+        "-config", "./dapr/config.yaml",
+        # "-log-level", "debug"
+        ]
+    volumes:
+      - "./dapr/:/dapr"
+    depends_on:
+      - user-accessor
+    network_mode: "service:user-accessor"
+
   news-aggregation-engine:
     build: ./newsAggregationEngine
     ports:
@@ -30,6 +79,39 @@ services:
       - user-manager
     networks:
       - my-network
+
+  news-aggregation-engine-dapr:
+    image: "daprio/daprd:edge"
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 10
+        window: 120s
+    command: ["./daprd",
+        "-app-port", "80",
+        "-app-id", "news-aggregation-engine",
+        "-app-protocol", "http",
+        "-dapr-http-port", "3500",
+        #"-placement-host-address", "placement:50006",
+        "-components-path", "./dapr/components",
+        "-config", "./dapr/config.yaml",
+        # "-log-level", "debug"
+        ]
+    volumes:
+      - "./dapr/:/dapr"
+    depends_on:
+      - news-aggregation-engine
+    network_mode: "service:news-aggregation-engine"
+
+
+  rabbitmq:
+    image: "rabbitmq:3-management-alpine"
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - my-network 
 
   mongodb:
     image: mongo
