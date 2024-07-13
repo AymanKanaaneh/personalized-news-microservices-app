@@ -1,7 +1,14 @@
 const User = require('../models/user');
+const userValidators = require('../validators/userValidators');
 
 const createUser = async (userData) => {
   try {
+    const { error } = userValidators.validateUserPayload(userData);
+
+    if(error) {
+      throw new Error(error.message);
+    }
+
     const user = new User(userData);
     const savedUser = await user.save();
     return savedUser;
@@ -12,7 +19,12 @@ const createUser = async (userData) => {
 
 const updateUserPreferences = async (userPreferencesPayload) => {
   try {
-    console.log('Payload:', userPreferencesPayload);
+
+    const { error } = userValidators.validatePreferencesPayload(userPreferencesPayload);
+
+    if(error){
+      throw new Error(error.message);
+    }
 
     const updatedUser = await User.findOneAndUpdate(
       { email: userPreferencesPayload.email },
