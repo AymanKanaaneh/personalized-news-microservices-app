@@ -44,7 +44,7 @@ const updateUserPreferences = async (userPreferencesPayload) => {
 
     const result = await client.invoker.invoke(
       'user-accessor',
-      'user/preferences',
+      'user/preferences/update',
       HttpMethod.PUT,
       userPreferencesPayload
     );
