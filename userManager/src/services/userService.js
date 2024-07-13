@@ -1,15 +1,15 @@
 const { DaprClient, HttpMethod } = require('@dapr/dapr');
 const { daprHost, daprPort } = require('../../config/environment');
-const { validateUserPayload, validatePreferencesPayload } = require('../validators/validators');
-const logger = require('../../config/logger');
-
 const client = new DaprClient(daprHost, daprPort);
+
+const userValidators = require('../validators/userValidators');
+const logger = require('../../config/logger');
 
 const registerUser = async (userPayload) => {
   try {
     logger.info('Registering user', { payload: userPayload });
 
-    const { error } = validateUserPayload(userPayload);
+    const { error } = userValidators.validateUserPayload(userPayload);
     if (error) {
       const validationError = `Validation failed: ${error.details.map(x => x.message).join(', ')}`;
       logger.error(validationError, { payload: userPayload });
@@ -35,7 +35,7 @@ const updateUserPreferences = async (userPreferencesPayload) => {
   try {
     logger.info('Updating user preferences', { payload: userPreferencesPayload });
 
-    const { error } = validatePreferencesPayload(userPreferencesPayload);
+    const { error } = userValidators.validatePreferencesPayload(userPreferencesPayload);
     if (error) {
       const validationError = `Validation failed: ${error.details.map(x => x.message).join(', ')}`;
       logger.error(validationError, { payload: userPreferencesPayload });
