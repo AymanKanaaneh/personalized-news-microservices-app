@@ -8,11 +8,23 @@ const registerUser = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
-    
-const updateUserPreferences = async (req, res) => {
+
+const getUserPreferences = async (req, res) => {
+
   try {
 
-    console.log(req.body);
+    const userEmailAddress = req.params.userEmailAddress;
+    const preferences = await userService.getUserPreferences(userEmailAddress);
+    res.status(200).json(preferences);
+
+  } catch(error){
+    res.status(400).json({ error: error.message });
+  }
+
+}
+
+const updateUserPreferences = async (req, res) => {
+  try {
     updatedUserPreferences = await userService.updateUserPreferences(req.body);
     res.status(200).json(updatedUserPreferences);
   } catch (error) {
@@ -20,4 +32,4 @@ const updateUserPreferences = async (req, res) => {
   }
 };
 
-module.exports = { registerUser, updateUserPreferences };
+module.exports = { registerUser, getUserPreferences, updateUserPreferences };

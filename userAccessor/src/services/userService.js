@@ -17,6 +17,23 @@ const createUser = async (userData) => {
   }
 };
 
+const getUserPreferences = async (userEmailAddress) => {
+  try {
+
+    const { error } = userValidators.validateUserEmail(userEmailAddress);
+
+    if(error){
+      throw new Error(error.message);
+    }
+
+      const user = await User.findOne({email: userEmailAddress}).select('preferences');
+      return user.preferences;
+
+  }catch(error){
+    throw error;
+  }
+};
+
 const updateUserPreferences = async (userPreferencesPayload) => {
   try {
 
@@ -45,4 +62,4 @@ const updateUserPreferences = async (userPreferencesPayload) => {
   }
 };
 
-module.exports = { createUser, updateUserPreferences };
+module.exports = { createUser, getUserPreferences, updateUserPreferences };
