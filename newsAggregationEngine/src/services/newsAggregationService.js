@@ -3,14 +3,9 @@ const nodemailer = require('../../config/nodemailer');
 const { ZIONET_MAILER_EMAIL } = require('../../config/environment');
 const logger = require('../../config/logger');
 
-const preferences = [
-    "technology",
-    "science",
-    "sports",
-    "business",
-    "health",
-    "entertainment",
-];
+const { DaprClient, HttpMethod } = require('@dapr/dapr');
+const { daprHost, daprPort } = require('../../config/environment');
+const client = new DaprClient(daprHost, daprPort);
 
 /**
  * Fetches news based on user preferences and sends them via email.
@@ -20,13 +15,14 @@ const preferences = [
 const pickUserNews = async (userEmailAddress) => {
     try {
         logger.info(`Fetching news for ${userEmailAddress}`);
-
-        const prompt = generatePrompt();
-        const result = await model.generateContent(prompt);
-        const response = await result.response;
-        const jsonString = extractJsonString(response);
-        const jsonNewsArr = JSON.parse(jsonString);
-        sendNews(userEmailAddress, jsonNewsArr);
+        
+        const preferences = await getUserPreferences(userEmailAddress);
+        const prompt = generatePrompt(preferences);
+        const newsContentStream = await model.generateContent(prompt);
+        const newsContent = await newsContentStream.response;
+        const newsJsonString = extractJsonString(newsContent);
+        const newsJsonArr = JSON.parse(newsJsonString);
+        sendNews(userEmailAddress, newsJsonArr);
 
         logger.info(`News sent successfully to ${userEmailAddress}`);
         return { message: "The news has been sent successfully" };
@@ -36,13 +32,27 @@ const pickUserNews = async (userEmailAddress) => {
     }
 };
 
+const getUserPreferences = async (userEmailAddress) => {
+    try {
+        const endpoint = `user/preferences/${userEmailAddress}`;
+        const preferences = await client.invoker.invoke('user-accessor', endpoint, HttpMethod.GET);
+        
+        return preferences;
+    } catch (error) {
+        logger.error(`Error fetching user preferences for ${userEmailAddress}:`, error);
+        throw error;
+    }
+};
+
+
 /**
  * Generates a prompt based on predefined preferences.
+ * @param {preferences} - predefined preferences object.
  * @returns {string} A formatted prompt string.
  */
-function generatePrompt() {
+function generatePrompt(preferences) {
     let prompt = `Given a list of preferences, provide the latest news articles that match these preferences. Ensure the news is current and relevant to the specified topics. Each article should include the title, a brief summary, the source, and a link to the full article. The preferences are as follows:\n`;
-    prompt += preferences.join('\n');
+    prompt += Object.values(preferences).join('\n');
     prompt += "\nReturn only the data in a JSON object with the following structure:\n";
     prompt += JSON.stringify({
         "category": 'health',
@@ -68,10 +78,10 @@ function extractJsonString(response) {
 /**
  * Sends news articles to the user via email.
  * @param {string} userEmailAddress - The email address of the user.
- * @param {Array} jsonNewsArr - Array of news articles in JSON format.
+ * @param {Array} newsJsonArr - Array of news articles in JSON format.
  */
-function sendNews(userEmailAddress, jsonNewsArr) {
-    jsonNewsArr.forEach(jsonNewsData => {
+function sendNews(userEmailAddress, newsJsonArr) {
+    newsJsonArr.forEach(jsonNewsData => {
         const payload = setMailPayload(userEmailAddress, jsonNewsData);
         sendEmail(payload);
     });
