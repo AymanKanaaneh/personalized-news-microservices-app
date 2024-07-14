@@ -2,9 +2,11 @@ const newsAggregationService = require('../services/newsAggregationService');
 const logger = require('../../config/logger');
 
 const pickUserNews = async (req, res) => {
+
+    let userEmailAddress;
     
     try {
-        const userEmailAddress = req.params.userEmailAddress;
+        userEmailAddress = req.params.userEmailAddress;
         logger.info(`Received request to pick news for user: ${userEmailAddress}`);
 
         const news = await newsAggregationService.pickUserNews(userEmailAddress);
