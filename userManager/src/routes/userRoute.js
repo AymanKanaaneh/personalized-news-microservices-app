@@ -5,6 +5,9 @@ const userController = require('../controllers/userController');
 
 router.post('/register', userController.registerUser);
 
-router.put('/preferences/:emailAddress', userController.updateUserPreferences);
+router.post('/news/emailsqueue/:emailAddress', userController.addToEmailsQueue);
+
+router.put('/preferences/:emailAddress', userController.updateUserPreferences)
+
 
 module.exports = router;

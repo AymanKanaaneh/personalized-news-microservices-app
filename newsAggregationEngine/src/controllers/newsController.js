@@ -1,12 +1,13 @@
 const newsAggregationService = require('../services/newsAggregationService');
 const logger = require('../../config/logger');
 
-const pickUserNews = async (req, res) => {
+const sendEmailNews = async (req, res) => {
 
-    let userEmailAddress;
-    
+
+    const userEmailAddress = req.body.email;
+
     try {
-        userEmailAddress = req.params.userEmailAddress;
+
         logger.info(`Received request to pick news for user: ${userEmailAddress}`);
 
         const news = await newsAggregationService.pickUserNews(userEmailAddress);
@@ -21,5 +22,5 @@ const pickUserNews = async (req, res) => {
 };
 
 module.exports = {
-    pickUserNews
+    sendEmailNews
 };
