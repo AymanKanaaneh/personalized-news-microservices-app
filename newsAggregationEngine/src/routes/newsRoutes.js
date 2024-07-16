@@ -3,8 +3,6 @@ const router = express.Router();
 
 const newsController = require('../controllers/newsController');
 
-
-router.get('/:userEmailAddress', newsController.pickUserNews);
-
+router.post('/', newsController.sendEmailNews);
 
 module.exports = router;

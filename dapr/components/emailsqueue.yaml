@@ -1,7 +1,7 @@
 apiVersion: dapr.io/v1alpha1
 kind: Component
 metadata:
-  name: newsqueue
+  name: emailsqueue
 spec:
   type: bindings.rabbitmq
   version: v1
@@ -9,7 +9,7 @@ spec:
   - name: host
     value: "amqp://rabbitmq:5672"
   - name: queueName
-    value: newsqueue
+    value: emailsqueue
   - name: durable
     value: false
   - name: deleteWhenUnused

@@ -35,4 +35,15 @@ const updateUserPreferences = async (req, res) => {
   }
 };
 
-module.exports = { registerUser, updateUserPreferences };
+const addToEmailsQueue = async (req, res) => {
+
+  try {
+    const result = await userService.addToEmailsQueue(req.params.emailAddress);
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+
+}
+
+module.exports = { registerUser, updateUserPreferences, addToEmailsQueue };

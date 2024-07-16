@@ -57,4 +57,15 @@ const updateUserPreferences = async (userPreferencesPayload) => {
   }
 };
 
-module.exports = { registerUser, updateUserPreferences };
+const addToEmailsQueue = async (userEmailAddress) => {
+
+  try {
+    const result = await client.binding.send('emailsqueue', 'create', { email: userEmailAddress });
+    return result;
+  } catch (error) {
+    throw new Error(`Failed to add email to queue: ${error.message}`);
+  }
+};
+
+
+module.exports = { registerUser, updateUserPreferences, addToEmailsQueue };
