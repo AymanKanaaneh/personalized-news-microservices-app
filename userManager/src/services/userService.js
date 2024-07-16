@@ -6,6 +6,15 @@ const userValidators = require('../validators/userValidators');
 const logger = require('../../config/logger');
 const customExceptions = require('../exceptions/customExceptions');
 
+/**
+ * Registers a new user using the user-accessor service via Dapr invocation.
+ * @param {Object} userPayload - The user data payload to register.
+ * @returns {Promise<Object>} - The result of user registration.
+ * @throws {ValidationException} If user data validation fails.
+ * @throws {NetworkException} If user-accessor service is unreachable.
+ * @throws {TimeoutException} If user-accessor service does not respond in time.
+ * @throws {DatabaseException} If a database error occurs during registration.
+ */
 const registerUser = async (userPayload) => {
   try {
     logger.info('Registering user', { payload: userPayload });
@@ -43,6 +52,15 @@ const registerUser = async (userPayload) => {
   }
 };
 
+/**
+ * Updates user preferences using the user-accessor service via Dapr invocation.
+ * @param {Object} userPreferencesPayload - The payload containing user email and preferences.
+ * @returns {Promise<Object>} - The result of user preferences update.
+ * @throws {ValidationException} If preferences payload validation fails.
+ * @throws {NetworkException} If user-accessor service is unreachable.
+ * @throws {TimeoutException} If user-accessor service does not respond in time.
+ * @throws {DatabaseException} If a database error occurs during update.
+ */
 const updateUserPreferences = async (userPreferencesPayload) => {
   try {
     logger.info('Updating user preferences', { payload: userPreferencesPayload });
@@ -80,19 +98,29 @@ const updateUserPreferences = async (userPreferencesPayload) => {
   }
 };
 
+
+/**
+ * Adds user email to the emails queue using Dapr binding.
+ * @param {string} userEmailAddress - The email address to add to the queue.
+ * @returns {Promise<Object>} - The result of adding email to the queue.
+ * @throws {ValidationException} If email validation fails.
+ * @throws {NetworkException} If emailsqueue service is unreachable.
+ * @throws {TimeoutException} If emailsqueue service does not respond in time.
+ * @throws {QueueException} If an error occurs while adding email to the queue.
+ */
 const addToEmailsQueue = async (userEmailAddress) => {
   try {
     const { error } = userValidators.validateUserEmail(userEmailAddress);
 
     if (error) {
       const validationError = `Validation failed: ${error.details.map(x => x.message).join(', ')}`;
-      throw new ValidationException(validationError);
+      throw new customExceptions.ValidationException(validationError);
     }
 
     const result = await client.binding.send('emailsqueue', 'create', { email: userEmailAddress });
     return result;
   } catch (error) {
-    if (error instanceof ValidationException) {
+    if (error instanceof customExceptions.ValidationException) {
       logger.error('Validation error while adding email to queue', { error });
       throw error;
     } else if (error.code === 'ENOTFOUND') {

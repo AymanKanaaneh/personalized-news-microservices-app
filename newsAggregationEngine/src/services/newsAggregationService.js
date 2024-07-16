@@ -47,6 +47,13 @@ const pickUserNews = async (userEmailAddress) => {
     }
 };
 
+
+/**
+ * Retrieves user preferences from the user-accessor service via Dapr invocation.
+ * @param {string} userEmailAddress - The email address of the user whose preferences to retrieve.
+ * @returns {Promise<Object>} - The user's preferences.
+ * @throws {NetworkException} If user-accessor service is unreachable.
+ */
 const getUserPreferences = async (userEmailAddress) => {
     try {
         const endpoint = `user/preferences/${userEmailAddress}`;
