@@ -6,6 +6,7 @@ const logger = require('../../config/logger');
 const { DaprClient, HttpMethod } = require('@dapr/dapr');
 const { daprHost, daprPort } = require('../../config/environment');
 const client = new DaprClient(daprHost, daprPort);
+const customExceptions = require('../exceptions/customExceptions');
 
 /**
  * Fetches news based on user preferences and sends them via email.
@@ -14,21 +15,35 @@ const client = new DaprClient(daprHost, daprPort);
  */
 const pickUserNews = async (userEmailAddress) => {
     try {
-        logger.info(`Fetching news for ${userEmailAddress}`);
         
+        logger.info(`Fetching news for ${userEmailAddress}`);
         const preferences = await getUserPreferences(userEmailAddress);
         const prompt = generatePrompt(preferences);
         const newsContentStream = await model.generateContent(prompt);
         const newsContent = await newsContentStream.response;
         const newsJsonString = extractJsonString(newsContent);
         const newsJsonArr = JSON.parse(newsJsonString);
-        sendNews(userEmailAddress, newsJsonArr);
-
+        await sendNews(userEmailAddress, newsJsonArr);
+    
         logger.info(`News sent successfully to ${userEmailAddress}`);
         return { message: "The news has been sent successfully" };
     } catch (error) {
+        
         logger.error(`Error fetching or sending news for ${userEmailAddress}: ${error.message}`);
-        throw error;
+  
+        if (error instanceof customExceptions.ValidationException) {
+            throw new customExceptions.ValidationException(`Validation error: ${error.message}`);
+        } else if (error instanceof customExceptions.NetworkException) {
+            throw new customExceptions.NetworkException('Network error: Unable to reach the news service.');
+        } else if (error instanceof customExceptions.TimeoutException) {
+            throw new customExceptions.TimeoutException('Request timed out: The news service did not respond in time.');
+        } else if (error instanceof customExceptions.ContentGenerationException) {
+            throw new customExceptions.ContentGenerationException('Error generating content: Failed to generate news content.');
+        } else if (error instanceof customExceptions.NewsSendingException) {
+            throw new customExceptions.NewsSendingException('Error sending news: Failed to send news to the user.');
+        } else {
+            throw new Error(`An unexpected error occurred: ${error.message}`);
+        }
     }
 };
 
@@ -36,11 +51,10 @@ const getUserPreferences = async (userEmailAddress) => {
     try {
         const endpoint = `user/preferences/${userEmailAddress}`;
         const preferences = await client.invoker.invoke('user-accessor', endpoint, HttpMethod.GET);
-        
         return preferences;
     } catch (error) {
         logger.error(`Error fetching user preferences for ${userEmailAddress}:`, error);
-        throw error;
+        throw new customExceptions.NetworkException('Failed to fetch user preferences.');
     }
 };
 
@@ -71,8 +85,12 @@ function generatePrompt(preferences) {
  * @returns {string} Extracted JSON string.
  */
 function extractJsonString(response) {
-    const jsonString = response.text().match(/\[.*?\]/s)[0];
-    return jsonString;
+    try {
+        const jsonString = response.text().match(/\[.*?\]/s)[0];
+        return jsonString;
+    } catch (error) {
+        throw new customExceptions.ContentGenerationException('Failed to extract JSON string from response.');
+    }
 }
 
 /**
@@ -80,11 +98,15 @@ function extractJsonString(response) {
  * @param {string} userEmailAddress - The email address of the user.
  * @param {Array} newsJsonArr - Array of news articles in JSON format.
  */
-function sendNews(userEmailAddress, newsJsonArr) {
-    newsJsonArr.forEach(jsonNewsData => {
+async function sendNews(userEmailAddress, newsJsonArr) {
+    try {
+        await Promise.all(newsJsonArr.map(async (jsonNewsData) => {
         const payload = setMailPayload(userEmailAddress, jsonNewsData);
-        sendEmail(payload);
-    });
+        await sendEmail(payload);
+        }));
+    } catch (error) {
+        throw new customExceptions.NewsSendingException('Failed to send news to the user.');
+    }
 }
 
 /**
@@ -106,14 +128,19 @@ function setMailPayload(userEmailAddress, jsonNewsData) {
  * Sends an email using Nodemailer.
  * @param {Object} payload - Email payload object.
  */
-function sendEmail(payload) {
-    const mailOptions = {
+async function sendEmail(payload) {
+    try {
+        const mailOptions = {
         from: payload.from,
         to: payload.to,
         subject: payload.subject,
         text: payload.text,
-    };
-    nodemailer.transporter.sendMail(mailOptions);
+      };
+      await nodemailer.transporter.sendMail(mailOptions);
+    } catch (error) {
+      logger.error('Error sending email:', error);
+      throw new customExceptions.NewsSendingException('Failed to send email.');
+    }
 }
 
 module.exports = {
