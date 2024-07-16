@@ -3,6 +3,13 @@ const userValidators = require('../validators/userValidators');
 const logger = require('../../config/logger');
 const customExceptions = require('../exceptions/customExceptions');
 
+/**
+ * Creates a new user.
+ * @param {Object} userData - The user data to create.
+ * @returns {Promise<Object>} - The saved user object.
+ * @throws {ValidationException} If user data validation fails.
+ * @throws {DatabaseException} If user creation fails.
+ */
 const createUser = async (userData) => {
   try {
     const { error } = userValidators.validateUserPayload(userData);
@@ -22,6 +29,15 @@ const createUser = async (userData) => {
     throw new customExceptions.DatabaseException('Failed to create user');
   }
 };
+
+
+/**
+ * Retrieves user preferences by email address.
+ * @param {string} userEmailAddress - The email address of the user.
+ * @returns {Promise<Object>} - The user's preferences.
+ * @throws {ValidationException} If email validation fails.
+ * @throws {DatabaseException} If user retrieval fails.
+ */
 const getUserPreferences = async (userEmailAddress) => {
 
   try {
@@ -55,6 +71,13 @@ const getUserPreferences = async (userEmailAddress) => {
 };
 
 
+/**
+ * Updates user preferences.
+ * @param {Object} userPreferencesPayload - The payload containing user email and preferences.
+ * @returns {Promise<Object|null>} - The updated user object, or null if user not found.
+ * @throws {ValidationException} If preferences validation fails.
+ * @throws {DatabaseException} If user update fails.
+ */
 const updateUserPreferences = async (userPreferencesPayload) => {
   try {
     const { error } = userValidators.validatePreferencesPayload(userPreferencesPayload);
