@@ -1,8 +1,8 @@
-const hostname = 'localhost';
-const port = 3100;
+const hostName = process.env.HOST_NAME || 'http://localhost';
+const port = process.env.PORT || 3100;
 
 
 module.exports = {
-    hostname,
+    hostName,
     port
 };
