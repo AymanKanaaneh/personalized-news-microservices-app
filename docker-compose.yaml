@@ -6,10 +6,15 @@ services:
     build: ./userManager
     ports:
       - "3000:3000"
+    depends_on:
+      - rabbitmq
+    environment:
+      - HOST_NAME=user-manager
+      - PORT=3000
+      - DAPR_HOST=user-manager-dapr
+      - DAPR_PORT=3500
     networks:
       - my-network
-    environment:
-      - USER_ACCESSOR_URL=http://user-accessor:3100
 
   user-manager-dapr:
     image: "daprio/daprd:edge"
@@ -41,8 +46,13 @@ services:
       - "3100:3100"
     depends_on:
       - mongodb
+      - rabbitmq
     environment:
       - MONGODB_URI=mongodb://mongodb:27017/mydatabase
+      - HOST_NAME=user-accessor
+      - PORT=3100
+      - DAPR_HOST=user-accessor-dapr
+      - DAPR_PORT=3500
     networks:
       - my-network
 
@@ -75,8 +85,12 @@ services:
     ports:
       - "3200:3200"
     depends_on:
-      - user-accessor
-      - user-manager
+      - rabbitmq
+    environment:
+      - HOST_NAME=news-aggregation-engine
+      - PORT=3200
+      - DAPR_HOST=news-aggregation-engine-dapr
+      - DAPR_PORT=3500
     networks:
       - my-network
 
@@ -104,7 +118,6 @@ services:
       - news-aggregation-engine
     network_mode: "service:news-aggregation-engine"
 
-
   rabbitmq:
     image: "rabbitmq:3-management-alpine"
     ports:
@@ -121,7 +134,7 @@ services:
       - ./mongoDB/data/db:/data/db
     networks:
       - my-network
-
+      
 networks:
   my-network:
     driver: bridge
