@@ -55,18 +55,26 @@ const getUserPreferences = async (req, res) => {
 
 const updateUserPreferences = async (req, res) => {
   try {
-    const updatedUserPreferences = await userService.updateUserPreferences(req.body);
+    console.log('8');
 
-    const { error } = userValidators.validatePreferencesPayload(updatedUserPreferences);
+    const userPreferencesPayload = req.body;
+    const { error } = userValidators.validatePreferencesPayload(userPreferencesPayload);
     if (error) {
+      console.log('20');
+      console.log(error);
+      console.log(updatedUserPreferences);
       throw new customExceptions.ValidationException(error.message);
     }
-    
+
+    const updatedUserPreferences = await userService.updateUserPreferences(req.body);
+    console.log('9');
+    console.log('10');
     if (!updatedUserPreferences) {
       res.status(404).json({ error: 'User preferences not found' });
     } else {
       res.status(200).json(updatedUserPreferences);
     }
+    console.log('11');
 
   } catch (error) {
     if (error instanceof customExceptions.ValidationException) {
