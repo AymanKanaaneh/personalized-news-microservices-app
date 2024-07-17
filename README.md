@@ -51,7 +51,7 @@ This command builds Docker images for each service and starts them in detached m
 - MongoDB: The database used to store and retrieve users and their prefernces entries.
 
 ## Usage:
-The User Manager service exposes the following endpoints on http://user-manager:3000
+The User Manager service exposes the following endpoints on http://localhost:3000
 - `POST /user/register`: Register a new user
 - `POST /user/news/emailsqueue/:emailAddress`: Sends emails addresses pushes to the RabbitMQ queue via Dapr.
 - `PUT /user/prefernces`: Interact with the User Accessor service to update preferences. Include preference and email data in JSON format within the request body."
