@@ -80,7 +80,7 @@ const getUserPreferences = async (userEmailAddress) => {
  */
 const updateUserPreferences = async (userPreferencesPayload) => {
   try {
-    console.log('12');
+
     const { error } = userValidators.validatePreferencesPayload(userPreferencesPayload);
 
     if (error) {
@@ -93,16 +93,11 @@ const updateUserPreferences = async (userPreferencesPayload) => {
       { new: true }
     );
 
-    console.log('13');
-
     if (!updatedUser) {
       logger.warn(`User with email ${userPreferencesPayload.email} not found.`);
       throw new customExceptions.DatabaseException('User not found');
     }
-
-    console.log('14');
-
-    console.log('Updated User: ', updatedUser);
+    logger.info(`User prefernces updated successfully: ${updatedUser}`);
     return updatedUser;
   } catch (error) {
     if (error instanceof customExceptions.ValidationException) {
