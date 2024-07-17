@@ -79,3 +79,5 @@ In the "Try it out" section below each endpoint, you can directly enter test dat
 
 Carefully examine the response code to ensure it aligns with the expected outcome (e.g., 200 for success, 400 for bad request). Compare the response body with the specified schema to verify that the data is returned in the correct format and structure.
 
+![Personalized News Update Aggregator Diagram](https://github.com/user-attachments/assets/f438523d-a701-4082-967b-9f8b04b393b4)
+
