@@ -118,7 +118,7 @@ const addToEmailsQueue = async (userEmailAddress) => {
     }
 
     const result = await client.binding.send('emailsqueue', 'create', { email: userEmailAddress });
-    return result;
+    return { message: "Request successfully added to the emails queue - Sending personalized news updates based on your preferences....." };
   } catch (error) {
     if (error instanceof customExceptions.ValidationException) {
       logger.error('Validation error while adding email to queue', { error });
